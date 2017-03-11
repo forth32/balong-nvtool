@@ -33,7 +33,7 @@ if (argc != 3) {
   printf("\n! Не указаны имена файлов для объединения\n\
 Формат командной строки:\n\n\
   %s nvimg-file xml-file\n\n\
-Выходной файл - nvdload.fw\n\n",argv[0]);
+Выходной файл - nvdload.nvd\n\n",argv[0]);
   exit(0);
 }
 
@@ -76,7 +76,7 @@ hdr.start1=0x54;
 hdr.start2=hdr.start1+hdr.len1;
 
 // записываем компоненты
-out=fopen("nvdload.fw","w");
+out=fopen("nvdload.nvd","w");
 fwrite(&hdr,1,0x54,out);
 
 printf("\n Тип    старт    размер\n--------------------------");
