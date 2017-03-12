@@ -147,7 +147,7 @@ printf("\n Формат командной строки:\n\n\
 -u       - печать уникальных идентификаторов и настроек\n\
 -e       - извлечь все ячейки \n\
 -x item  - извлечь в файл ячейку item\n\
--d item  - вывести дамп ячейки item\n\
+-d item  - вывести дамп ячейки item (d* - все ячейки)\n\
 -r item:file - заменить ячейку item на содержимое файла file\n\n\
 -m item[+off]:nn[:nn...] - заменить байты в item на байты, указанные в команде\n\
 -a item[+off]:text - записать текстовую строку в item\n\
@@ -248,7 +248,8 @@ while ((opt = getopt(argc, argv, "hlucex:d:r:m:b:i:s:a:")) != -1) {
      break;
      
    case 'd':
-     sscanf(optarg,"%i",&dflag);
+     if (*optarg == '*') dflag=-2;  
+     else sscanf(optarg,"%i",&dflag);
      break;
      
    case 'r':
@@ -339,17 +340,10 @@ if (xflag != -1) {
 
 // Просмотр дампа ячеек
 if (dflag != -1) {
-  len=load_item(dflag,buf);
-  if (len == -1) {
-    printf("\n - Ячейка %i не найдена\n",dflag);
-    return;
-  }
-  printf("\n ----- Ячейка: %i   Размер: %i байт ",dflag,len);
-  sptr=find_desc(dflag);
-  if (strlen(sptr) != 0) printf(" Имя: %s ",sptr);
-  printf("-----\n");
-  fdump(buf,len,0,stdout);
-  printf("\n");
+  if (dflag != -2) dump_item(dflag); // одна ячейка
+  else 
+  // все ячейки
+     for(i=0;i<nvhd.item_count;i++)  dump_item(itemlist[i].id);
 }
 
 // Замена ячеек

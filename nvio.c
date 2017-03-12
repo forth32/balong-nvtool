@@ -179,6 +179,31 @@ printf("\n");
 }
 
 //**********************************************
+//* Дамп ячейки nvram
+//**********************************************
+void dump_item(uint32_t item) {
+
+int len;
+char buf[16384];
+char* desc;
+    
+len=load_item(item,buf);
+if (len == -1) {
+    printf("\n - Ячейка %i не найдена\n",item);
+    return;
+}
+
+printf("\n ----- Ячейка: %i   Размер: %i байт ",item,len);
+desc=find_desc(item);
+if (strlen(desc) != 0) printf(" Имя: %s ",desc);
+printf("-----\n");
+fdump(buf,len,0,stdout);
+printf("\n");
+}
+
+
+
+//**********************************************
 //* Загрузка ячейки в буфер
 //**********************************************
 int load_item(int item, char* buf) {
@@ -420,4 +445,6 @@ if (buf[0] != 0) {
 printf("\n");
 }
 
+  
+  
   

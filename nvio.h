@@ -21,3 +21,4 @@ void brute(int flag);
 void print_data();
 void  write_imei(char* imei);
 void  write_serial(char* serial);
+void dump_item(uint32_t item);
