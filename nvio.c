@@ -306,9 +306,7 @@ fclose(out);
 }
 
 //**********************************************
-//* Извлечение ячейки в файл
-//*
-//* item - # ячейки
+//* Извлечение всех ячеек в файл
 //**********************************************
 void extract_all_item() {
 
@@ -323,6 +321,44 @@ for(i=0;i<nvhd.item_count;i++) {
 printf("\n\n");
 }
 
+//**********************************************
+//* Импорт всех ячеек из указанного каталога
+//**********************************************
+void mass_import(char* dir) {
+  
+int i;
+char filename[200];
+uint32_t fsize;
+FILE* in;
+char ibuf[32768];
+int idx;
+
+printf("\n Импорт ячеек:\n\n");
+for (i=0;i<65536;i++) {
+  sprintf(filename,"%s/%05i.nvm",dir,i);
+  in=fopen(filename,"r");
+  if (in == 0) continue; // такого файла у нас нет
+  // грузим файл в буфер и заодно определяем размер его
+  fsize=fread(ibuf,1,32768,in);
+  fclose(in);
+  // проверяем параметры ячейки в образе
+  idx=itemidx(i);
+  if (idx == -1) {
+    printf("\n Ячейка %i не найдена в образе nvram\n",i);
+    continue;
+  }  
+  if (itemlist[idx].len != fsize) {  
+    printf("\n Ячейка %i: размер ячейки (%i) не соответствует размеру файла (%i)\n",i,itemlist[idx].len,fsize);
+    continue;
+  }  
+  // импорт ячейки  
+  printf("\r Ячейка %i: ok",i);
+  fseek(nvf,itemoff_idx(idx),SEEK_SET);
+  fwrite(ibuf,itemlist[idx].len,1,nvf);
+}
+}
+  
+  
 //**********************************************
 //* Поск оем и симлок - кодов
 //*  1 - oem

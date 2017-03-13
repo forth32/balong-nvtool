@@ -22,4 +22,5 @@ void print_data();
 void  write_imei(char* imei);
 void  write_serial(char* serial);
 void dump_item(uint32_t item);
-void extract_comp_items(int32_t kflag);
+void extract_comp_items(int32_t fid);
+void mass_import(char* dir);

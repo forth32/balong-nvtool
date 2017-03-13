@@ -156,6 +156,7 @@ printf("\n Формат командной строки:\n\n\
 -s serial- записать новый серийный номер\n\
 -c       - извлечь все компонентные файлы \n\
 -k n     - извлечь все ячейки, относящиеся к компоненте n, в каталог COMPn\n\
+-w dir   - импортировать содержимое ячеек из файлов каталога dir/\n\
 -b oem|simlock|all - произвести подбор OEM, SIMLOCK или обоих кодов\n\
 \n",utilname);
 }
@@ -188,8 +189,9 @@ int uflag=0;
 int iflag=0;
 int sflag=0;
 int kflag=-1;
+char wflag[200]={0};
 
-while ((opt = getopt(argc, argv, "hlucex:d:r:m:b:i:s:a:k:")) != -1) {
+while ((opt = getopt(argc, argv, "hlucex:d:r:m:b:i:s:a:k:w:")) != -1) {
   switch (opt) {
    case 'h': 
     utilhelp(argv[0]);
@@ -232,6 +234,10 @@ while ((opt = getopt(argc, argv, "hlucex:d:r:m:b:i:s:a:k:")) != -1) {
      
    case 'c':
      cflag=1;
+     break;
+     
+   case 'w':
+     strcpy(wflag,optarg);
      break;
      
    case 'i':
@@ -352,6 +358,9 @@ if (dflag != -1) {
   // все ячейки
      for(i=0;i<nvhd.item_count;i++)  dump_item(itemlist[i].id);
 }
+
+// Массовый импорт ячеек (ключ -w)
+if (strlen(wflag) != 0) mass_import(wflag);
 
 // Замена ячеек
 if (rflag != -1) {
