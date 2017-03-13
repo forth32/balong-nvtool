@@ -26,9 +26,23 @@ int i;
 for (i=0;i<nvhd.file_num;i++) {
   if (flist[i].id == fid) return flist[i].offset;
 }
-printf("\n - Ошибка структуры файла - файла #%i не существует\n",fid);
+printf("\n - Ошибка структуры файла - компоненты #%i не существует\n",fid);
 exit(1);
 }
+
+//******************************************************
+// Получение индкса по номеру файла
+//******************************************************
+int32_t fileidx(int fid) {
+
+int i;
+
+for (i=0;i<nvhd.file_num;i++) {
+  if (flist[i].id == fid) return i;
+}
+return -1;
+}
+
 
 //******************************************************
 // Получение смещения до начала ячейки по ее индексу
@@ -179,6 +193,34 @@ printf("\n");
 }
 
 //**********************************************
+//* Исвлечение ячеек по номеру компоненты
+//**********************************************
+void extract_comp_items(int32_t fn) {
+
+
+char dirname[100];  
+int i,fidx;
+
+fidx=fileidx(fn);
+if (fidx == -1) {
+  printf("\n Компоненты %i не существует\n",fn);
+  return;
+}
+
+printf("\n Извлечение ячеек компоненты %i (%s)\n\n",fn,flist[fidx].name);
+sprintf(dirname,"COMP%i/",fn);
+mkdir(dirname,0777);
+
+for(i=0;i<nvhd.item_count;i++) {
+  if (itemlist[i].file_id != fn) continue;
+  printf("\r Ячейка %i",itemlist[i].id);
+  item_to_file(itemlist[i].id,dirname);
+}  
+printf("\n\n");
+
+}
+
+//**********************************************
 //* Дамп ячейки nvram
 //**********************************************
 void dump_item(uint32_t item) {
@@ -186,16 +228,24 @@ void dump_item(uint32_t item) {
 int len;
 char buf[16384];
 char* desc;
-    
-len=load_item(item,buf);
-if (len == -1) {
+int32_t idx,fidx;    
+int32_t fn;
+
+idx=itemidx(item);
+if (idx == -1) {
     printf("\n - Ячейка %i не найдена\n",item);
     return;
 }
 
-printf("\n ----- Ячейка: %i   Размер: %i байт ",item,len);
+fseek(nvf,itemoff_idx(idx),SEEK_SET);
+fread(buf,itemlist[idx].len,1,nvf);
+len=itemlist[idx].len;
+fn=itemlist[idx].file_id;
+fidx=fileidx(fn);
+
+printf("\n -- Ячейка # %i: %i байт -- Компонент %i (%s) -- ",item,len,fn,flist[fidx].name);
 desc=find_desc(item);
-if (strlen(desc) != 0) printf(" Имя: %s ",desc);
+if (strlen(desc) != 0) printf(" Имя: %s --",desc);
 printf("-----\n");
 fdump(buf,len,0,stdout);
 printf("\n");

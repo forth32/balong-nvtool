@@ -155,6 +155,7 @@ printf("\n Формат командной строки:\n\n\
 -i imei    записать новый IMEI\n\
 -s serial- записать новый серийный номер\n\
 -c       - извлечь все компонентные файлы \n\
+-k n     - извлечь все ячейки, относящиеся к компоненте n, в каталог COMPn\n\
 -b oem|simlock|all - произвести подбор OEM, SIMLOCK или обоих кодов\n\
 \n",utilname);
 }
@@ -186,8 +187,9 @@ int bflag=0;
 int uflag=0;
 int iflag=0;
 int sflag=0;
+int kflag=-1;
 
-while ((opt = getopt(argc, argv, "hlucex:d:r:m:b:i:s:a:")) != -1) {
+while ((opt = getopt(argc, argv, "hlucex:d:r:m:b:i:s:a:k:")) != -1) {
   switch (opt) {
    case 'h': 
     utilhelp(argv[0]);
@@ -245,6 +247,10 @@ while ((opt = getopt(argc, argv, "hlucex:d:r:m:b:i:s:a:")) != -1) {
      
    case 'x':
      sscanf(optarg,"%i",&xflag);
+     break;
+     
+   case 'k':
+     sscanf(optarg,"%i",&kflag);
      break;
      
    case 'd':
@@ -333,6 +339,7 @@ if (uflag) {
 // извлечение файлов и ячеек
 if (cflag) extract_files();
 if (eflag) extract_all_item();
+if (kflag != -1) extract_comp_items(kflag);
 if (xflag != -1) {
   printf("\n Извлекается ячейка %i\n",xflag);
   item_to_file(xflag,"");
