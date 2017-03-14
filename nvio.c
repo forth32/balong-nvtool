@@ -503,7 +503,7 @@ char wikey[5][68];   // ключи
 
 // вывод информации о продукте
 i=load_item(53525,(char*)&prodinfo);
-if (i == sizeof(prodinfo)) {
+if ((i == sizeof(prodinfo))&&(prodinfo.index != 0)) {
   printf("\n Product ID: %i %i",prodinfo.index,prodinfo.hwIdSub);
   printf("\n Prod. Name: %s",prodinfo.name);
   printf("\n HW version: %s",prodinfo.hwVer);
