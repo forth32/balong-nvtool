@@ -483,6 +483,17 @@ char buf[2560];
 char* bptr;
 int i;
 
+// NV 53525 - информации о продукте
+struct {
+     uint32_t index;          // +00 Hardware version number (large version number 1 + large version number 2), distinguish between different products * /
+     uint32_t hwIdSub;        // +04 hardware sub-version number, distinguish between different versions of the product * /
+     uint8_t name [32];       // +08 internal product name * /
+     uint8_t namePlus [32];   // +28 Internal product name PLUS * /
+     uint8_t hwVer [32];      // +48 Hardware version name * /
+     uint8_t dloadId [32];    // +68 the name used in the upgrade * /
+     uint8_t productId [32];  // +88 External Product Name * /
+ } prodinfo;
+
 // информация о wifi
 int wicount=0;       // число wifi-записей
 // char wissid[36][4];  // имена сетей
@@ -490,6 +501,15 @@ int wicount=0;       // число wifi-записей
 char wissid[5][36];  // имена сетей
 char wikey[5][68];   // ключи
 
+// вывод информации о продукте
+i=load_item(53525,(char*)&prodinfo);
+if (i == sizeof(prodinfo)) {
+  printf("\n Product ID: %i %i",prodinfo.index,prodinfo.hwIdSub);
+  printf("\n Prod. Name: %s",prodinfo.name);
+  printf("\n HW version: %s",prodinfo.hwVer);
+  printf("\n Dload ID  : %s",prodinfo.dloadId);
+  printf("\n Product ID: %s\n",prodinfo.productId);
+}  
 
 // вывод IMEI
 load_item(0,buf);

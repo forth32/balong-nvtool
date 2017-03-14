@@ -298,8 +298,10 @@ if (optind>=argc) {
 
 // открываем образ nvram
 nvf=fopen(argv[optind],"r+");
-if (nvf == 0) return;
-
+if (nvf == 0) {
+  printf("\n Файл %s не найден\n",argv[optind]);
+  return;
+}
 // читаем заголовок образа
 res=fread(&nvhd,1,sizeof(nvhd),nvf);
 if (res != sizeof(nvhd)) {
