@@ -2,9 +2,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#ifndef WIN32
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sha256.h>
+#else
+#include <windows.h>
+#include <direct.h>
+#include "printf.h"
+#endif
+
 #include "nvfile.h"
 #include "nvio.h"
 #include "nvid.h"
@@ -177,12 +184,16 @@ char filename[100];
 char* buf;
 FILE* out;
 
+#ifndef WIN32
 mkdir ("component",0777);
+#else
+_mkdir("component");
+#endif
 for(i=0;i<nvhd.file_num;i++) {
  fseek(nvf,flist[i].offset,SEEK_SET);
  printf("\n Извлечение файла %s",flist[i].name);
  sprintf(filename,"component/%s",flist[i].name);
- out=fopen(filename,"w");
+ out=fopen(filename,"wb");
  buf=malloc(flist[i].size);
  fread(buf,1,flist[i].size,nvf);
  fwrite(buf,1,flist[i].size,out);
@@ -209,7 +220,11 @@ if (fidx == -1) {
 
 printf("\n Извлечение ячеек компоненты %i (%s)\n\n",fn,flist[fidx].name);
 sprintf(dirname,"COMP%i/",fn);
+#ifndef WIN32
 mkdir(dirname,0777);
+#else
+_mkdir(dirname);
+#endif
 
 for(i=0;i<nvhd.item_count;i++) {
   if (itemlist[i].file_id != fn) continue;
@@ -300,7 +315,7 @@ if (len == -1) {
   printf("\n - Ячейка %i не найдена\n",item);
   exit(1);
 }  
-out=fopen(filename,"w");
+out=fopen(filename,"wb");
 fwrite(buf,1,len,out);
 fclose(out);
 }
@@ -312,7 +327,11 @@ void extract_all_item() {
 
 int i;
 
+#ifndef WIN32
 mkdir ("item",0777);
+#else
+_mkdir("item");
+#endif
 printf("\n");
 for(i=0;i<nvhd.item_count;i++) {
   printf("\r Ячейка %i",itemlist[i].id);
@@ -336,7 +355,7 @@ int idx;
 printf("\n Импорт ячеек:\n\n");
 for (i=0;i<65536;i++) {
   sprintf(filename,"%s/%05i.nvm",dir,i);
-  in=fopen(filename,"r");
+  in=fopen(filename,"rb");
   if (in == 0) continue; // такого файла у нас нет
   // грузим файл в буфер и заодно определяем размер его
   fsize=fread(ibuf,1,32768,in);
@@ -364,6 +383,7 @@ for (i=0;i<65536;i++) {
 //*  1 - oem
 //*  2 - simlock
 //**********************************************
+#ifndef WIN32
 void brute(int flag) {
   
 char buf[128];
@@ -407,6 +427,7 @@ for(code=0;code<99999999;code++) {
 }  
 printf("\n%s-код не найден\n",(flag == 1)?"OEM":"Simlock");
 }
+#endif
 
 //************************************************
 //* Запись нового IMEI
@@ -523,9 +544,15 @@ load_item(44,buf);
 printf("\n IPaddr: %s",buf);
 
 // вывод wifi-параметров
+#ifndef WIN32
 bzero(buf,256);
 bzero(wissid,36*4);
 bzero(wikey,68*4);
+#else
+memset(buf,0,256);
+memset(wissid,0,36*4);
+memset(wikey,0,68*4);
+#endif
 load_item(9111,buf);
 if (buf[0] != 0) {
   // ssid

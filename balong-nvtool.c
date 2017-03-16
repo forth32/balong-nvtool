@@ -1,10 +1,17 @@
 #include <stdio.h>
+#include <stdint.h>
+#ifndef WIN32
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#else
+#include <windows.h>
+#include "getopt.h"
+#include "printf.h"
+#include "buildno.h"
+#endif
 
 #include "nvfile.h"
 #include "nvio.h"
@@ -128,9 +135,12 @@ strncpy(adata,sptr,128);
 //****************************************************************
 void utilheader() {
   
-printf("\n Утилита для редактирования образов NVRAM устройств на чипсете Hisilicon Balong, V1.0.%i, (c) forth32, 2016, GNU GPLv3",BUILDNO);
-printf("\n-------------------------------------------------------------------------------------------------------------------------\n");
-
+printf("\n Утилита для редактирования образов NVRAM устройств на чипсете\n"
+       "Hisilicon Balong, V1.0.%i (c) forth32, 2016, GNU GPLv3",BUILDNO);
+#ifdef WIN32
+printf("\n Порт для Windows 32bit (c) rust3028, 2017");
+#endif
+printf("\n-------------------------------------------------------------------\n");
 }
 
 
@@ -156,9 +166,11 @@ printf("\n Формат командной строки:\n\n\
 -s serial- записать новый серийный номер\n\
 -c       - извлечь все компонентные файлы \n\
 -k n     - извлечь все ячейки, относящиеся к компоненте n, в каталог COMPn\n\
--w dir   - импортировать содержимое ячеек из файлов каталога dir/\n\
--b oem|simlock|all - произвести подбор OEM, SIMLOCK или обоих кодов\n\
-\n",utilname);
+-w dir   - импортировать содержимое ячеек из файлов каталога dir/\n"
+#ifndef WIN32
+"-b oem|simlock|all - произвести подбор OEM, SIMLOCK или обоих кодов\n"
+#endif
+"\n",utilname);
 }
 
 
@@ -191,7 +203,11 @@ int sflag=0;
 int kflag=-1;
 char wflag[200]={0};
 
+#ifndef WIN32
 while ((opt = getopt(argc, argv, "hlucex:d:r:m:b:i:s:a:k:w:")) != -1) {
+#else
+while ((opt = getopt(argc, argv, "hlucex:d:r:m:i:s:a:k:w:")) != -1) {
+#endif
   switch (opt) {
    case 'h': 
     utilhelp(argv[0]);
@@ -297,7 +313,7 @@ if (optind>=argc) {
 }
 
 // открываем образ nvram
-nvf=fopen(argv[optind],"r+");
+nvf=fopen(argv[optind],"r+b");
 if (nvf == 0) {
   printf("\n Файл %s не найден\n",argv[optind]);
   return;
@@ -371,7 +387,7 @@ if (rflag != -1) {
     printf("\n - Ячейка %i не найдена\n",rflag);
     return;
   }  
-  in=fopen(rfilename,"r");
+  in=fopen(rfilename,"rb");
   if (in == 0) {
     printf("\n - Ошибка открытия файла %s\n",rfilename);
     return;
@@ -422,6 +438,7 @@ if (aflag != -1) {
 }  
 
 // подбор кодов блокировкии
+#ifndef WIN32
 if (bflag) {
   utilheader();
   switch (bflag) {
@@ -439,6 +456,7 @@ if (bflag) {
       return;
   }   
 }
+#endif
 
 // запись IMEI
 if (iflag) write_imei(imei);
