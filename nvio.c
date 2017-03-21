@@ -5,7 +5,7 @@
 #ifndef WIN32
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sha256.h>
+#include "sha256.h"
 #else
 #include <windows.h>
 #include <direct.h>
