@@ -11,7 +11,7 @@ clean:
 	rm *.o
 	rm $(TARGET)
 
-balong-nvtool: balong-nvtool.o nvio.o nvid.o sha2.o sha256.o
+balong-nvtool: balong-nvtool.o nvio.o nvid.o sha2.o 
 	@gcc $^ -o $@ $(LIBS) 
 	@echo Current buid: $(BUILDNO)
 	@echo $$((`cat build`+1)) >build
