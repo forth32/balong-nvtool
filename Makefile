@@ -1,5 +1,4 @@
 CC       = gcc
-LIBS     = -lmd
 BUILDNO=$(shell cat build)
 CFLAGS   = -O2  -Wunused -Wno-unused-result -D BUILDNO=$(BUILDNO) $(LIBS) 
 TARGET = balong-nvtool nvdload-split nvdload-combine
@@ -12,7 +11,7 @@ clean:
 	rm *.o
 	rm $(TARGET)
 
-balong-nvtool: balong-nvtool.o nvio.o nvid.o sha256.o
+balong-nvtool: balong-nvtool.o nvio.o nvid.o sha2.o sha256.o
 	@gcc $^ -o $@ $(LIBS) 
 	@echo Current buid: $(BUILDNO)
 	@echo $$((`cat build`+1)) >build
