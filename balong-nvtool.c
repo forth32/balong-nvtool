@@ -493,4 +493,5 @@ if (iflag) write_imei(imei);
 // запись серийника
 if (sflag) write_serial(serial);
 printf("\n");  
+fclose(nvf);
 }

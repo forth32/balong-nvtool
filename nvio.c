@@ -287,10 +287,9 @@ struct __attribute__ ((__packed__))  {
 
 int nvfd;
 
-//nvfd=open("/proc/OmNv","O_RDWR");
-nvfd=open("/proc/OmNv","O_WRONLY");
+// nvfd=open("/proc/OmNv","O_WRONLY");
+nvfd=open("/proc/OmNv","O_RDWR");
 if (nvfd == -1) {
-//    printf("\n Интерфейс ядра /dev/nv не открывается - запись невозможна\n");
     perror("\n Интерфейс ядра /proc/OmNv не открывается - запись невозможна\n");
     exit(0);
 }
@@ -327,6 +326,7 @@ return itemlist[idx].len;
 int save_item(int item, char* buf) {
   
 int idx;
+int res;
 #ifdef MODEM
 if (!directflag) {
     kernel_writeEx(item,buf);
@@ -338,7 +338,12 @@ idx=itemidx(item);
 if (idx == -1) return 0; // не найдена
 
 fseek(nvf,itemoff_idx(idx),SEEK_SET);
-fwrite(buf,itemlist[idx].len,1,nvf);
+res=fwrite(buf,itemlist[idx].len,1,nvf);
+if (res != 1) {
+    printf("\nОшибка записи ячейки %i",item);
+    perror("");
+    return 0;
+}    
 
 return 1; // ok
 }
