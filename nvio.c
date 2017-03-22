@@ -23,6 +23,11 @@ struct nv_file flist[100];
 // каталог ячеек
 struct nv_item itemlist[65536];
 
+#ifdef MODEM 
+// флаг прямой работы с nvram-файлом вместо интерфейса ядра
+extern int32_t directflag;
+#endif
+
 
 //******************************************************
 // Получение смещения до начала файла по номеру файла
@@ -266,6 +271,40 @@ fdump(buf,len,0,stdout);
 printf("\n");
 }
 
+#ifdef MODEM 
+//**********************************************
+//* Запись ячейки через интерфейс ядра
+//**********************************************
+void kernel_writeEx(int item, char* buf) {
+    
+// Командный пакет для обмена с /dev/nv
+struct __attribute__ ((__packed__))  {  
+  uint16_t  id;
+  uint16_t  len;
+  uint32_t  res;
+  uint8_t data[1024];
+} nvreq;
+
+int nvfd;
+
+//nvfd=open("/proc/OmNv","O_RDWR");
+nvfd=open("/proc/OmNv","O_WRONLY");
+if (nvfd == -1) {
+//    printf("\n Интерфейс ядра /dev/nv не открывается - запись невозможна\n");
+    perror("\n Интерфейс ядра /proc/OmNv не открывается - запись невозможна\n");
+    exit(0);
+}
+nvreq.id=item;
+nvreq.len=itemlen(item);
+memcpy(nvreq.data,buf,nvreq.len);
+write(nvfd,&nvreq,sizeof(nvreq));
+if (nvreq.res != 0) {
+    printf("\n Интерфейс nvWriteEx вернул ошибку %i при записи ячейки %i\n",nvreq.res,item);
+    exit(0);
+}
+close(nvfd);
+}
+#endif
 
 
 //**********************************************
@@ -288,6 +327,12 @@ return itemlist[idx].len;
 int save_item(int item, char* buf) {
   
 int idx;
+#ifdef MODEM
+if (!directflag) {
+    kernel_writeEx(item,buf);
+    return 1;
+}    
+#endif
 
 idx=itemidx(item);
 if (idx == -1) return 0; // не найдена
@@ -363,17 +408,25 @@ for (i=0;i<65536;i++) {
   // проверяем параметры ячейки в образе
   idx=itemidx(i);
   if (idx == -1) {
-    printf("\n Ячейка %i не найдена в образе nvram\n",i);
+    printf("\r Ячейка %i не найдена в образе nvram\n",i);
     continue;
   }  
   if (itemlist[idx].len != fsize) {  
-    printf("\n Ячейка %i: размер ячейки (%i) не соответствует размеру файла (%i)\n",i,itemlist[idx].len,fsize);
+    printf("\r Ячейка %i: размер ячейки (%i) не соответствует размеру файла (%i)\n",i,itemlist[idx].len,fsize);
     continue;
   }  
   // импорт ячейки  
-  printf("\r Ячейка %i: ok",i);
+  printf("\r Ячейка %i: ",i);
+#ifdef MODEM
+  if (!directflag) {
+    kernel_writeEx(i,ibuf);
+    printf("OK");
+    continue;
+  }    
+#endif
   fseek(nvf,itemoff_idx(idx),SEEK_SET);
   fwrite(ibuf,itemlist[idx].len,1,nvf);
+  printf("OK");
 }
 }
   
@@ -525,11 +578,11 @@ char wikey[5][68];   // ключи
 // вывод информации о продукте
 i=load_item(53525,(char*)&prodinfo);
 if ((i == sizeof(prodinfo))&&(prodinfo.index != 0)) {
-  printf("\n Product ID: %i %i",prodinfo.index,prodinfo.hwIdSub);
-  printf("\n Prod. Name: %s",prodinfo.name);
-  printf("\n HW version: %s",prodinfo.hwVer);
-  printf("\n Dload ID  : %s",prodinfo.dloadId);
-  printf("\n Product ID: %s\n",prodinfo.productId);
+  printf("\n Product Code: %i %i",prodinfo.index,prodinfo.hwIdSub);
+  printf("\n Product Name: %s",prodinfo.name);
+  printf("\n HW version  : %s",prodinfo.hwVer);
+  printf("\n Dload ID    : %s",prodinfo.dloadId);
+  printf("\n Product ID  : %s\n",prodinfo.productId);
 }  
 
 // вывод IMEI

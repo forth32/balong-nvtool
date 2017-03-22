@@ -1,6 +1,6 @@
 CC       = arm-linux-androideabi-gcc
 LD       = arm-linux-androideabi-ld
-CFLAGS   = -O2  -Wunused -Wno-unused-result -D BUILDNO=$(BUILDNO) $(LIBS) --sysroot=/opt/ndk-toolchain/sysroot
+CFLAGS   = -DMODEM -Os  -Wunused -Wno-unused-result -D BUILDNO=$(BUILDNO) $(LIBS) --sysroot=/opt/ndk-toolchain/sysroot
 BUILDNO  = $(shell cat build)
 OUTDIR   = modem-bin
 TARGET = $(OUTDIR)/balong-nvtool $(OUTDIR)/nvdload-split $(OUTDIR)/nvdload-combine

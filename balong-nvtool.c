@@ -29,6 +29,10 @@ int aflag=-1;
 int aoff=0;
 char adata[128];
 
+#ifdef MODEM 
+// флаг прямой работы с nvram-файлом вместо интерфейса ядра
+int32_t directflag=0;
+#endif
 
 //****************************************************************
 //*   Разбор параметров ключа -m
@@ -136,7 +140,7 @@ strncpy(adata,sptr,128);
 void utilheader() {
   
 printf("\n Утилита для редактирования образов NVRAM устройств на чипсете\n"
-       "Hisilicon Balong, V1.0.%i (c) forth32, 2016, GNU GPLv3",BUILDNO);
+       " Hisilicon Balong, V1.0.%i (c) forth32, 2016, GNU GPLv3",BUILDNO);
 #ifdef WIN32
 printf("\n Порт для Windows 32bit (c) rust3028, 2017");
 #endif
@@ -170,6 +174,9 @@ printf("\n Формат командной строки:\n\n\
 #ifndef WIN32
 "-b oem|simlock|all - произвести подбор OEM, SIMLOCK или обоих кодов\n"
 #endif
+#ifdef MODEM
+"-f      - использовать прямую запись в рабочую NVRAM вместо интерфейса ядра\n"
+#endif
 "\n",utilname);
 }
 
@@ -189,6 +196,7 @@ char* sptr;
 FILE* in;
 char imei[16];
 char serial[20];
+char nvfilename[100];
 
 int xflag=-1;
 int lflag=0;
@@ -204,7 +212,7 @@ int kflag=-1;
 char wflag[200]={0};
 
 #ifndef WIN32
-while ((opt = getopt(argc, argv, "hlucex:d:r:m:b:i:s:a:k:w:")) != -1) {
+while ((opt = getopt(argc, argv, "hlucex:d:r:m:b:i:s:a:k:w:f")) != -1) {
 #else
 while ((opt = getopt(argc, argv, "hlucex:d:r:m:i:s:a:k:w:")) != -1) {
 #endif
@@ -213,6 +221,15 @@ while ((opt = getopt(argc, argv, "hlucex:d:r:m:i:s:a:k:w:")) != -1) {
     utilhelp(argv[0]);
     return;
 
+   case 'f':
+#ifndef MODEM
+     printf("\n На данной платформе ключ -f недопустим\n");
+     return;
+#else
+     directflag=1;
+     break;
+#endif     
+    
    case 'b':
      switch (optarg[0]) {
        case 'o':
@@ -308,12 +325,24 @@ while ((opt = getopt(argc, argv, "hlucex:d:r:m:i:s:a:k:w:")) != -1) {
 
 
 if (optind>=argc) {
+#ifndef MODEM    
     printf("\n - Не файл образа nvram, для подсказки используйте ключ -h\n");
     return;
+#else
+    strcpy(nvfilename,"/mnvm2:0/nv.bin");
+#endif    
+}
+else {
+    strcpy(nvfilename,argv[optind]);
+#ifdef MODEM
+    // при работе внутри модема, автоматически устанавливаем флаг прямого доступа при указании входного файла
+    directflag=1;
+#endif
 }
 
+
 // открываем образ nvram
-nvf=fopen(argv[optind],"r+b");
+nvf=fopen(nvfilename,"r+b");
 if (nvf == 0) {
   printf("\n Файл %s не найден\n",argv[optind]);
   return;
