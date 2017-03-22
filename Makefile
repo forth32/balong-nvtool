@@ -1,6 +1,6 @@
 CC       = gcc
 BUILDNO=$(shell cat build)
-CFLAGS   = -O2  -Wunused -Wno-unused-result -D BUILDNO=$(BUILDNO) $(LIBS) 
+CFLAGS   = -O2  -Wunused -Wno-unused-result -D BUILDNO=$(BUILDNO) $(LIBS) -g
 TARGET = balong-nvtool nvdload-split nvdload-combine
 
 .PHONY: all clean

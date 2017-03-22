@@ -22,3 +22,7 @@ $(OUTDIR)/nvdload-split: nvdload-split.o
 
 $(OUTDIR)/nvdload-combine: nvdload-combine.o
 	$(CC)  $^ -o $@ $(LIBS) 
+
+upload: $(OUTDIR)/balong-nvtool
+	@wput -u modem-bin/balong-nvtool ftp://modem/online/
+	

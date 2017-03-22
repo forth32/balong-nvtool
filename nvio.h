@@ -4,7 +4,7 @@ extern struct nvfile_header nvhd;
 // каталог файлов
 extern struct nv_file flist[];
 // каталог ячеек
-extern struct nv_item itemlist[];
+extern struct nv_item* itemlist;
 
 void fdump(char buffer[],unsigned int len,unsigned int base, FILE* dump);
 void print_filelist();

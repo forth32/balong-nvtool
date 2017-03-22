@@ -39,10 +39,14 @@ int32_t directflag=0;
 //****************************************************************
 void parse_mflag(char* arg) {
   
-char buf[16384];
+char buf[1024];
 char* sptr, *offptr;
 int endflag=0;
 
+if (strlen(arg)>1024) {
+    printf("\nСлишком длинный аргумент ключа -m\n");
+    exit(0);
+}    
 strcpy(buf,arg);
 
 // проверяем на наличие байта +
@@ -96,9 +100,13 @@ do {
 //****************************************************************
 void parse_aflag(char* arg) {
   
-char buf[16384];
+char buf[1024];
 char* sptr, *offptr;
 
+if (strlen(arg)>1024) {
+    printf("\nСлишком длинный аргумент ключа -a\n");
+    exit(0);
+}    
 strcpy(buf,arg);
 
 // проверяем на наличие байта +
@@ -189,7 +197,7 @@ int i;
 int opt;
 int res;
 uint32_t pos;
-char buf[16384];
+char buf[2062];
 int len;
 char rfilename[200];
 char* sptr;
@@ -372,7 +380,8 @@ for(i=0;i<nvhd.file_num;i++) {
 
 // Читаем каталог ячеек
 fseek(nvf,nvhd.item_offset,SEEK_SET);
-fread(&itemlist,1,nvhd.item_size,nvf);
+itemlist=malloc(nvhd.item_size);
+fread(itemlist,1,nvhd.item_size,nvf);
 
 // вывод карт и параметров
 if (lflag) {

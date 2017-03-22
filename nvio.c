@@ -21,7 +21,7 @@ struct nvfile_header nvhd;
 // Каталог файлов
 struct nv_file flist[100];
 // каталог ячеек
-struct nv_item itemlist[65536];
+struct nv_item* itemlist;
 
 #ifdef MODEM 
 // флаг прямой работы с nvram-файлом вместо интерфейса ядра
@@ -246,7 +246,7 @@ printf("\n\n");
 void dump_item(uint32_t item) {
 
 int len;
-char buf[16384];
+char buf[4100];
 char* desc;
 int32_t idx,fidx;    
 int32_t fn;
@@ -285,12 +285,15 @@ struct __attribute__ ((__packed__))  {
   uint8_t data[1024];
 } nvreq;
 
-int nvfd;
+volatile int nvfd;
 
-// nvfd=open("/proc/OmNv","O_WRONLY");
+if (itemlen(item)>1024) {
+    printf("\n Длина ячейки %i превышает 1024 байт - %i, запись невозможна",item,itemlen(item));
+    return;
+}    
 nvfd=open("/proc/OmNv","O_RDWR");
 if (nvfd == -1) {
-    perror("\n Интерфейс ядра /proc/OmNv не открывается - запись невозможна\n");
+    perror("\n Интерфейс ядра /proc/OmNv не открывается - запись невозможна ");
     exit(0);
 }
 nvreq.id=item;
@@ -355,7 +358,7 @@ return 1; // ok
 void item_to_file(int item, char* prefix) {
   
 char filename[100];
-char buf[32768];
+char buf[4100];
 FILE* out;
 int len;
 
@@ -384,7 +387,7 @@ _mkdir("item");
 #endif
 printf("\n");
 for(i=0;i<nvhd.item_count;i++) {
-  printf("\r Ячейка %i",itemlist[i].id);
+  printf("\r Ячейка %i длина %i",itemlist[i].id,itemlist[i].len);
   item_to_file(itemlist[i].id,"item/");
 }  
 printf("\n\n");
@@ -399,7 +402,7 @@ int i;
 char filename[200];
 uint32_t fsize;
 FILE* in;
-char ibuf[32768];
+char ibuf[4100];
 int idx;
 
 printf("\n Импорт ячеек:\n\n");
@@ -408,7 +411,7 @@ for (i=0;i<65536;i++) {
   in=fopen(filename,"rb");
   if (in == 0) continue; // такого файла у нас нет
   // грузим файл в буфер и заодно определяем размер его
-  fsize=fread(ibuf,1,32768,in);
+  fsize=fread(ibuf,1,2054,in);
   fclose(in);
   // проверяем параметры ячейки в образе
   idx=itemidx(i);
