@@ -25,7 +25,7 @@ struct nv_item* itemlist;
 
 #ifdef MODEM 
 // флаг прямой работы с nvram-файлом вместо интерфейса ядра
-extern int32_t directflag;
+extern int32_t kernelflag;
 #endif
 
 
@@ -331,7 +331,7 @@ int save_item(int item, char* buf) {
 int idx;
 int res;
 #ifdef MODEM
-if (!directflag) {
+if (kernelflag) {
     kernel_writeEx(item,buf);
     return 1;
 }    
@@ -426,7 +426,7 @@ for (i=0;i<65536;i++) {
   // импорт ячейки  
   printf("\r Ячейка %i: ",i);
 #ifdef MODEM
-  if (!directflag) {
+  if (kernelflag) {
     kernel_writeEx(i,ibuf);
     printf("OK");
     continue;

@@ -31,7 +31,7 @@ char adata[128];
 
 #ifdef MODEM 
 // флаг прямой работы с nvram-файлом вместо интерфейса ядра
-int32_t directflag=0;
+int32_t kernelflag=0;
 #endif
 
 //****************************************************************
@@ -183,7 +183,7 @@ printf("\n Формат командной строки:\n\n\
 "-b oem|simlock|all - произвести подбор OEM, SIMLOCK или обоих кодов\n"
 #endif
 #ifdef MODEM
-"-f      - использовать прямую запись в рабочую NVRAM вместо интерфейса ядра\n"
+"-f      - использовать интерфейс ядра для записи ячеек\n"
 #endif
 "\n",utilname);
 }
@@ -234,7 +234,7 @@ while ((opt = getopt(argc, argv, "hlucex:d:r:m:i:s:a:k:w:")) != -1) {
      printf("\n На данной платформе ключ -f недопустим\n");
      return;
 #else
-     directflag=1;
+     kernelflag=1;
      break;
 #endif     
     
@@ -344,7 +344,10 @@ else {
     strcpy(nvfilename,argv[optind]);
 #ifdef MODEM
     // при работе внутри модема, автоматически устанавливаем флаг прямого доступа при указании входного файла
-    directflag=1;
+    if (kernelflag==1) {
+        printf("\n Ключ -f неприменим к явному указанию имени файла");
+        kernelflag=0;
+    }    
 #endif
 }
 
