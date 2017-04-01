@@ -272,43 +272,6 @@ fdump(buf,len,0,stdout);
 printf("\n");
 }
 
-#ifdef MODEM 
-//**********************************************
-//* Запись ячейки через интерфейс ядра
-//**********************************************
-void kernel_writeEx(int item, char* buf) {
-    
-// Командный пакет для обмена с /dev/nv
-struct __attribute__ ((__packed__))  {  
-  uint16_t  id;
-  uint16_t  len;
-  uint32_t  res;
-  uint8_t data[1024];
-} nvreq;
-
-volatile int nvfd;
-
-if (itemlen(item)>1024) {
-    printf("\n Длина ячейки %i превышает 1024 байт - %i, запись невозможна",item,itemlen(item));
-    return;
-}    
-nvfd=open("/proc/OmNv","O_RDWR");
-if (nvfd == -1) {
-    perror("\n Интерфейс ядра /proc/OmNv не открывается - запись невозможна ");
-    exit(0);
-}
-nvreq.id=item;
-nvreq.len=itemlen(item);
-memcpy(nvreq.data,buf,nvreq.len);
-write(nvfd,&nvreq,sizeof(nvreq));
-if (nvreq.res != 0) {
-    printf("\n Интерфейс nvWriteEx вернул ошибку %i при записи ячейки %i\n",nvreq.res,item);
-    exit(0);
-}
-close(nvfd);
-}
-#endif
-
 
 //**********************************************
 //* Загрузка ячейки в буфер
@@ -331,12 +294,6 @@ int save_item(int item, char* buf) {
   
 int idx;
 int res;
-#ifdef MODEM
-if (kernelflag) {
-    kernel_writeEx(item,buf);
-    return 1;
-}    
-#endif
 
 idx=itemidx(item);
 if (idx == -1) return 0; // не найдена
@@ -426,13 +383,6 @@ for (i=0;i<65536;i++) {
   }  
   // импорт ячейки  
   printf("\r Ячейка %i: ",i);
-#ifdef MODEM
-  if (kernelflag) {
-    kernel_writeEx(i,ibuf);
-    printf("OK");
-    continue;
-  }    
-#endif
   fseek(nvf,itemoff_idx(idx),SEEK_SET);
   fwrite(ibuf,itemlist[idx].len,1,nvf);
   printf("OK");

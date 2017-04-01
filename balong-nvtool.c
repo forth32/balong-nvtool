@@ -35,6 +35,7 @@ uint32_t crcoff;
 #ifdef MODEM 
 // флаг прямой работы с nvram-файлом вместо интерфейса ядра
 int32_t kernelflag=0;
+int ecall(char* name);
 #endif
 
 int test_crc();
@@ -189,7 +190,7 @@ printf("\n Формат командной строки:\n\n\
 "-b oem|simlock|all - произвести подбор OEM, SIMLOCK или обоих кодов\n"
 #endif
 #ifdef MODEM
-"-f      - использовать интерфейс ядра для записи ячеек\n"
+"-f      - перезагрузить измененную nvram в память модема\n"
 #endif
 "\n",utilname);
 }
@@ -514,7 +515,11 @@ if (sflag) write_serial(serial);
 
 // перевычисление массива КС
 recalc_crc();
-
-printf("\n");  
 fclose(nvf);
+
+#ifdef MODEM
+  if (kernelflag) system("ecall bsp_nvm_reload");
+#endif
+printf("\n");  
+  
 }
