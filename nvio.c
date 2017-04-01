@@ -28,6 +28,7 @@ struct nv_item* itemlist;
 extern int32_t kernelflag;
 #endif
 
+int test_crc();
 
 //******************************************************
 // Получение смещения до начала файла по номеру файла
@@ -636,6 +637,10 @@ if (buf[0] != 0) {
   for(i=0;i<wicount;i++) printf("\n %1i  %-32.32s %-32.32s",i,(char*)&wissid[i],(char*)&wikey[i]);
   printf("\n");
 }  
+if (nvhd.crcflag == 0) printf("\n CRC   : off");
+else if (test_crc() == 0) printf("\n CRC   : OK");
+else printf("\n CRC   : Error!");
+
 printf("\n");
 }
 

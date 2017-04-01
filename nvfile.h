@@ -16,7 +16,7 @@ struct nvfile_header {
     U32 ctrl_size;  // размер управляющих структур (смещение до данных)
     U16 version;    // * file version * /
     U8 modem_num;   // номер модема для мультимодемных конфигураций
-    U8 reserved1;   
+    U8 crcflag;     // признак наличия CRC
     U32 file_offset; // смещение до списка файлов
     U32 file_num;    // число файлов в списке 
     U32 file_size;   // размер списка файлов

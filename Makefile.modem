@@ -13,7 +13,7 @@ clean:
 	rm *.o
 	rm $(TARGET)
 
-$(OUTDIR)/balong-nvtool: balong-nvtool.o nvio.o nvid.o sha2.o 
+$(OUTDIR)/balong-nvtool: balong-nvtool.o nvio.o nvid.o sha2.o nvcrc.o
 	$(CC) $^ -o $@ $(LIBS) 
 	@echo Current buid: $(BUILDNO)
 

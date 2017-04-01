@@ -29,10 +29,16 @@ int aflag=-1;
 int aoff=0;
 char adata[128];
 
+// Смещение до поля CRC в файле
+uint32_t crcoff;
+
 #ifdef MODEM 
 // флаг прямой работы с nvram-файлом вместо интерфейса ядра
 int32_t kernelflag=0;
 #endif
+
+int test_crc();
+void recalc_crc();
 
 //****************************************************************
 //*   Разбор параметров ключа -m
@@ -380,7 +386,8 @@ for(i=0;i<nvhd.file_num;i++) {
  flist[i].offset=pos;
  pos+=flist[i].size;
 } 
-
+// получаем смещение до поля CRC
+crcoff=pos;
 // Читаем каталог ячеек
 fseek(nvf,nvhd.item_offset,SEEK_SET);
 itemlist=malloc(nvhd.item_size);
@@ -504,6 +511,10 @@ if (iflag) write_imei(imei);
 
 // запись серийника
 if (sflag) write_serial(serial);
+
+// перевычисление массива КС
+recalc_crc();
+
 printf("\n");  
 fclose(nvf);
 }
