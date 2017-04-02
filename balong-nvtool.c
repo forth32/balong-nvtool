@@ -185,10 +185,8 @@ printf("\n Формат командной строки:\n\n\
 -s serial- записать новый серийный номер\n\
 -c       - извлечь все компонентные файлы \n\
 -k n     - извлечь все ячейки, относящиеся к компоненте n, в каталог COMPn\n\
--w dir   - импортировать содержимое ячеек из файлов каталога dir/\n"
-#ifndef WIN32
-"-b oem|simlock|all - произвести подбор OEM, SIMLOCK или обоих кодов\n"
-#endif
+-w dir   - импортировать содержимое ячеек из файлов каталога dir/\n\
+-b oem|simlock|all - произвести подбор OEM, SIMLOCK или обоих кодов\n"
 #ifdef MODEM
 "-f      - перезагрузить измененную nvram в память модема\n"
 #endif
@@ -226,11 +224,7 @@ int sflag=0;
 int kflag=-1;
 char wflag[200]={0};
 
-#ifndef WIN32
 while ((opt = getopt(argc, argv, "hlucex:d:r:m:b:i:s:a:k:w:f")) != -1) {
-#else
-while ((opt = getopt(argc, argv, "hlucex:d:r:m:i:s:a:k:w:")) != -1) {
-#endif
   switch (opt) {
    case 'h': 
     utilhelp(argv[0]);
@@ -487,7 +481,6 @@ if (aflag != -1) {
 }  
 
 // подбор кодов блокировкии
-#ifndef WIN32
 if (bflag) {
   utilheader();
   switch (bflag) {
@@ -505,7 +498,6 @@ if (bflag) {
       return;
   }   
 }
-#endif
 
 // запись IMEI
 if (iflag) write_imei(imei);

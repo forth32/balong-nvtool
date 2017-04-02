@@ -91,13 +91,16 @@ type $(ProjectDir)..\..\build &gt;&gt; $(ProjectDir)buildno.h</Command>
     <ClInclude Include="..\..\nvfile.h" />
     <ClInclude Include="..\..\nvid.h" />
     <ClInclude Include="..\..\nvio.h" />
+    <ClInclude Include="..\..\sha2.h" />
     <ClInclude Include="getopt.h" />
     <ClInclude Include="printf.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\balong-nvtool.c" />
+    <ClCompile Include="..\..\nvcrc.c" />
     <ClCompile Include="..\..\nvid.c" />
     <ClCompile Include="..\..\nvio.c" />
+    <ClCompile Include="..\..\sha2.c" />
     <ClCompile Include="getopt.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

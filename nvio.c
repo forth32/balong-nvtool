@@ -5,7 +5,6 @@
 #ifndef WIN32
 #include <sys/stat.h>
 #include <sys/types.h>
-#include "sha2.h"
 #else
 #include <windows.h>
 #include <direct.h>
@@ -15,6 +14,7 @@
 #include "nvfile.h"
 #include "nvio.h"
 #include "nvid.h"
+#include "sha2.h"
 
 // Хранилище заголовка файла
 struct nvfile_header nvhd;
@@ -395,7 +395,6 @@ for (i=0;i<65536;i++) {
 //*  1 - oem
 //*  2 - simlock
 //**********************************************
-#ifndef WIN32
 void brute(int flag) {
   
 char buf[128];
@@ -439,7 +438,6 @@ for(code=0;code<99999999;code++) {
 }  
 printf("\n%s-код не найден\n",(flag == 1)?"OEM":"Simlock");
 }
-#endif
 
 //************************************************
 //* Запись нового IMEI

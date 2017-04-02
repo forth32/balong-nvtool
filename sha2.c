@@ -42,8 +42,8 @@
 #define _C_LABEL_STRING(x)	x
 
 // #define	__weak_alias(alias,sym)						\
-	__asm(".weak " _C_LABEL_STRING(#alias) "\n"			\
-		_C_LABEL_STRING(#alias) " = " _C_LABEL_STRING(#sym));
+//	__asm(".weak " _C_LABEL_STRING(#alias) "\n"			\
+//		_C_LABEL_STRING(#alias) " = " _C_LABEL_STRING(#sym));
 
 /*
  * UNROLLED TRANSFORM LOOP NOTE:
