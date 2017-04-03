@@ -168,8 +168,10 @@ for (i=0;i<(crcsize>>2);i++) {
 }
 // пишем массив CRC в файл
 if (memcmp(oldcsblock, csblock, crcsize) != 0) {
-  fseek(nvf,crcoff+4,SEEK_SET);
-  fwrite(csblock,crcsize,1,nvf);
+  if (fseek(nvf,crcoff+4,SEEK_SET) != 0) 
+    printf("\n ! Ошибка позиционирования к массиву CRC");
+  else
+    fwrite(csblock,crcsize,1,nvf);
 }
 
 free(csblock);  
