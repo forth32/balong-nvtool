@@ -24,3 +24,7 @@ void  write_serial(char* serial);
 void dump_item(uint32_t item);
 void extract_comp_items(int32_t fid);
 void mass_import(char* dir);
+uint32_t calc_ctrl_crc();
+uint32_t item_crc(int item);
+int32_t itemidx(int item);
+uint32_t itemoff_idx(int idx);

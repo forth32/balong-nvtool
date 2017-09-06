@@ -16,6 +16,7 @@
 #include "nvfile.h"
 #include "nvio.h"
 #include "nvid.h"
+#include "nvcrc.h"
 
 // Файл с открытым образом nvram
 FILE* nvf=0;
@@ -353,12 +354,15 @@ else {
 }
 
 
+//------------ Разбор nv-файла и выделение из него управлющих структур -----------------------
+
 // открываем образ nvram
 nvf=fopen(nvfilename,"r+b");
 if (nvf == 0) {
   printf("\n Файл %s не найден\n",argv[optind]);
   return;
 }
+
 // читаем заголовок образа
 res=fread(&nvhd,1,sizeof(nvhd),nvf);
 if (res != sizeof(nvhd)) {
@@ -366,11 +370,32 @@ if (res != sizeof(nvhd)) {
   return;
 }
 if (nvhd.magicnum != FILE_MAGIC_NUM) {
-  printf("\n - Файл %s не является оразом NVRAM\n",argv[optind]);
+  printf("\n - Файл %s не является образом NVRAM\n",argv[optind]);
   return;
 }
 
-// Читаем каталог файлов
+// Определяем тип CRC
+switch (nvhd.crcflag) {
+  case 0:
+    crcmode=0;
+    break;
+    
+  case 1:  
+    crcmode=1;
+    break;
+    
+  case 8:
+    crcmode=2;
+    break;
+    
+  default:
+    crcmode=-1;
+    break;
+    
+}
+
+//----- Читаем каталог файлов
+
 fseek(nvf,nvhd.file_offset,SEEK_SET);
 pos=nvhd.ctrl_size;
 
@@ -380,10 +405,12 @@ for(i=0;i<nvhd.file_num;i++) {
  // вычисляем смещение до данных файла
  flist[i].offset=pos;
  pos+=flist[i].size;
-} 
+}
+
 // получаем смещение до поля CRC
 crcoff=pos;
-// Читаем каталог ячеек
+
+//----- Читаем каталог ячеек
 fseek(nvf,nvhd.item_offset,SEEK_SET);
 itemlist=malloc(nvhd.item_size);
 fread(itemlist,1,nvhd.item_size,nvf);
@@ -397,7 +424,7 @@ if (lflag) {
   return;
 }  
 
-// Вывод утинкальных параметров
+// Вывод уникальных параметров
 if (uflag) {
   print_data();
   return;
@@ -482,8 +509,12 @@ if (aflag != -1) {
 
 // подбор кодов блокировкии
 if (bflag) {
-  utilheader();
-  switch (bflag) {
+  if (nvhd.version>121) {
+    printf("\n Вычисление кодов на этой платформе не поддерживается");
+  }
+  else {
+   utilheader();
+   switch (bflag) {
     case 1:
       brute(1);
       return;
@@ -496,7 +527,8 @@ if (bflag) {
       brute(1);
       brute(2);
       return;
-  }   
+  }
+ } 
 }
 
 // запись IMEI

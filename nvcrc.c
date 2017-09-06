@@ -13,6 +13,11 @@
 // Смещение до поля CRC в файле
 extern uint32_t crcoff;
 
+// тип CRC, используемый в файле
+// 0 - нет crc
+// 1 - первый тип CRC, для V7R11, с массивом контрольных сумм
+// 2 - второй тип CRC, для V7R22, с индивидуальной КС
+int32_t crcmode;
 
 // таблица констант CRC-32
 
@@ -80,6 +85,8 @@ uint32_t filesize;
 // определяем размер NV-файла
 fseek(nvf,0,SEEK_END);
 filesize=ftell(nvf);
+// printf("\n fsize=%i crcoff=%i",filesize,crcoff);
+if (filesize == crcoff) return 0;
 // размер массива КС
 return filesize-crcoff-4;
 } 
@@ -100,8 +107,9 @@ int res=0;
 
 // проверяем флаг наличия CRC
 if (nvhd.crcflag == 0) return 0;
-
+if (nvhd.crcflag == 8) return -2; // V7R22 пока не поддерживается
 crcsize=calc_crcsize();
+if (crcsize == 0) return 0;
 // выделяем место под CRC-блок
 csblock=malloc(crcsize);
 // читаем массив CRC из файла
@@ -143,7 +151,7 @@ uint32_t blocksize=4096;
 uint32_t i;
 
 // проверяем флаг наличия CRC
-if (nvhd.crcflag == 0) return;
+if (crcmode != 1) return; // только для блочной CRC
 
 crcsize=calc_crcsize();
 
@@ -177,4 +185,84 @@ if (memcmp(oldcsblock, csblock, crcsize) != 0) {
 free(csblock);  
 free(oldcsblock);  
 }  
+
+//****************************************************
+//* Вычисление CRC управляющих структур
+//****************************************************
+uint32_t calc_ctrl_crc() {
   
+char* buf;
+uint32_t crc;
+
+buf=malloc(nvhd.ctrl_size-4);
+if (buf == 0) {
+  printf("\n Ошибка выделения буфера управляющих структур");
+  exit(1);
+}  
+fseek(nvf,0,SEEK_SET);
+fread(buf,nvhd.ctrl_size-4,1,nvf);
+crc=calc_crc32(buf,nvhd.ctrl_size-4);
+free(buf);
+
+return crc;  
+}
+
+
+//**********************************************
+//* Загрузка CRC отдельных ячеек 
+//**********************************************
+uint32_t load_item_crc(int item) {
+  
+int idx;
+uint32_t crc;
+
+idx=itemidx(item);
+if (idx == -1) return 0; // не найдена
+fseek(nvf,itemoff_idx(idx)+itemlen(item),SEEK_SET);
+fread(&crc,4,1,nvf);
+return crc;
+}
+
+
+//**********************************************
+//* Расчет CRC отдельных ячеек 
+//**********************************************
+uint32_t calc_item_crc(int item) {
+
+char* buf;
+uint32_t crc;
+
+buf=malloc(itemlen(item));
+  
+load_item(item,buf);
+crc=calc_crc32(buf,itemlen(item)),
+free(buf);
+if (crc == 0) crc=0x5b637eb3;
+return crc;
+}
+
+//**********************************************
+//* Перерасчет CRC отдельных ячеек 
+//**********************************************
+void restore_item_crc(int item) {
+  
+int idx;
+uint32_t crc;
+
+if (crcmode != 2) return; // только для типов 2
+crc=calc_item_crc(item);
+
+idx=itemidx(item);
+if (idx == -1) return; // не найдена
+fseek(nvf,itemoff_idx(idx)+itemlen(item),SEEK_SET);
+fwrite(&crc,4,1,nvf);
+}
+
+//**********************************************
+//* Проверка CRC отдельных ячеек 
+//**********************************************
+int verify_item_crc(int item) {
+
+if (calc_item_crc(item) != load_item_crc(item)) return 0;
+return 1;
+}

@@ -1,3 +1,6 @@
+#ifndef _NVIO_C
+#define _NVIO_C
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,7 +16,9 @@
 
 #include "nvfile.h"
 #include "nvio.h"
+#include "nvio.h"
 #include "nvid.h"
+#include "nvcrc.h"
 #include "sha2.h"
 
 // Хранилище заголовка файла
@@ -27,8 +32,6 @@ struct nv_item* itemlist;
 // флаг прямой работы с nvram-файлом вместо интерфейса ядра
 extern int32_t kernelflag;
 #endif
-
-int test_crc();
 
 //******************************************************
 // Получение смещения до начала файла по номеру файла
@@ -133,10 +136,27 @@ for (i=0;i<len;i+=16) {
 //**********************************************
 void print_hd_info() {
   
-printf("\n Версия файла NVRAM:       %i",nvhd.version);
+printf("\n Версия файла NVRAM:       %i (0x%x)",nvhd.version,nvhd.version);
 printf("\n Номер модема:             %i",nvhd.modem_num);
 printf("\n Идентификатор устройства: %s",nvhd.product_version);
-
+printf("\n Тип CRC:                  ");
+switch (crcmode) {
+  case 0:
+    printf("Нет");
+    break;
+    
+  case 1:
+    printf("Блочная, тип 1");
+    break;
+    
+  case 2:
+    printf("Индивидуальная, тип 8");
+    break;
+    
+  default:
+    printf("Неподдерживаемая в этой версии утилиты, тип %x",nvhd.crcflag);
+    break;
+}    
   
 }
 
@@ -164,20 +184,28 @@ printf("\n * Всего файлов: %i\n",nvhd.file_num);
 void print_itemlist() {
   
 int i;
-
+uint32_t badflag=0;
 printf("\n\n --- Каталог ячеек ----\n");
 printf("\n NVID   FID  позиция   размер  приоритет  имя\n-----------------------------------------------");
 
 for (i=0;i<nvhd.item_count;i++) {
-  printf("\n %-5i  %2i   %08x  %4i    %x  %s",
-	itemlist[i].id, 
-	itemlist[i].file_id, 
-	itemoff_idx(i),
-	itemlist[i].len, 
-	itemlist[i].priority,
-	find_desc(itemlist[i].id)); 
+   printf("\n %-5i  %2i   %08x  %4i    %x   %s",
+ 	itemlist[i].id, 
+ 	itemlist[i].file_id, 
+ 	itemoff_idx(i),
+ 	itemlist[i].len, 
+ 	itemlist[i].priority,
+ 	find_desc(itemlist[i].id)); 
+
+
+  if ((crcmode ==2) && !verify_item_crc(itemlist[i].id)) {
+    printf("\n ! ** Ошибка CRC ячейки.\n");
+    badflag++;
+  }   
 }
 printf("\n\n * Всего ячеек: %i\n",nvhd.item_count);
+if ((crcmode == 2) && (badflag != 0)) printf(" ! Ячеек с ошибкой CRC: %i\n",badflag);
+    
 }
 
 //**********************************************
@@ -269,6 +297,7 @@ desc=find_desc(item);
 if (strlen(desc) != 0) printf(" Имя: %s --",desc);
 printf("-----\n");
 fdump(buf,len,0,stdout);
+if ((crcmode == 2) && !verify_item_crc(item)) printf("\n ! Ошибка CRC ячейки");
 printf("\n");
 }
 
@@ -286,6 +315,8 @@ fseek(nvf,itemoff_idx(idx),SEEK_SET);
 fread(buf,itemlist[idx].len,1,nvf);
 return itemlist[idx].len;
 }
+
+
 
 //**********************************************
 //* Запись ячейки из буфера
@@ -305,7 +336,7 @@ if (res != 1) {
     perror("");
     return 0;
 }    
-
+restore_item_crc(item); // восстанавливаем CRC ячейки
 return 1; // ok
 }
 
@@ -329,6 +360,7 @@ if (len == -1) {
 out=fopen(filename,"wb");
 fwrite(buf,1,len,out);
 fclose(out);
+if ((crcmode == 2) && !verify_item_crc(item)) printf("\n Ячейка %i: ошибка CRC",item);
 }
 
 //**********************************************
@@ -385,6 +417,7 @@ for (i=0;i<65536;i++) {
   printf("\r Ячейка %i: ",i);
   fseek(nvf,itemoff_idx(idx),SEEK_SET);
   fwrite(ibuf,itemlist[idx].len,1,nvf);
+  restore_item_crc(i);
   printf("OK");
 }
 }
@@ -512,7 +545,10 @@ void print_data() {
 
 char buf[2560];
 char* bptr;
-int i;
+int i,badflag=0;
+
+// CRC управяющей структуры
+uint32_t crc_ctrl=0;
 
 // NV 53525 - информации о продукте
 struct {
@@ -584,14 +620,54 @@ if (buf[0] != 0) {
 ----------------------------------------------------------------------------------\n");
   for(i=0;i<wicount;i++) printf("\n %1i  %-32.32s %-32.32s",i,(char*)&wissid[i],(char*)&wikey[i]);
   printf("\n");
-}  
-if (nvhd.crcflag == 0) printf("\n CRC   : off");
-else if (test_crc() == 0) printf("\n CRC   : OK");
-else printf("\n CRC   : Error!");
+
+}
+
+// Проверяем crc
+
+// Выделяем CRC заголовка
+if (crcmode == 2) {
+  if ((nvhd.ctrl_size-nvhd.item_offset-nvhd.item_size) != 4) 
+                       printf("\n CTRL CRC   : отсутствует поле CRC в заголовке - формат файла неверен"); 
+  else {
+   // выделяем CRC управяющей структуры
+   fseek(nvf,nvhd.ctrl_size-4,SEEK_SET);
+   fread(&crc_ctrl,4,1,nvf);
+   if (crc_ctrl == calc_ctrl_crc())
+     printf("\n CTRL CRC   : OK");
+   else
+     printf("\n CTRL CRC   : Error!");
+  } 
+}    
+else printf("\n CTRL CRC   : Отсутствует");
+
+// Проверяем CRC области данных
+switch (crcmode) {
+  case 0:
+    printf("\n DATA CRC   : Отсутствует");
+    break;
+    
+  case 1:  
+    if (test_crc() == 0) printf("\n DATA CRC   : OK");
+    else printf("\n DATA CRC   : Error!");
+    break;
+    
+  case 2:
+    for (i=0;i<nvhd.item_count;i++) {
+     if ((crcmode ==2) && !verify_item_crc(itemlist[i].id))  badflag++;
+    }   
+    if (badflag != 0) printf("\n DATA CRC   : Ячеек с ошибкой CRC: %i",badflag);
+    else printf("\n DATA CRC   : OK");
+    break;
+    
+  default:
+    printf("\n DATA CRC   : Неподдерживаемый тип");
+  
+}
 
 printf("\n");
 }
 
   
   
-  
+#endif // define _NVIO_C 
