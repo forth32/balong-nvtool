@@ -354,13 +354,13 @@ int len;
 sprintf(filename,"%s%05i.nvm",prefix,item);
 len=load_item(item,buf);
 if (len == -1) {
-  printf("\n - Ячейка %i не найдена\n",item);
+  printf(" -  не найдена\n");
   exit(1);
 }  
 out=fopen(filename,"wb");
 fwrite(buf,1,len,out);
 fclose(out);
-if ((crcmode == 2) && !verify_item_crc(item)) printf("\n Ячейка %i: ошибка CRC",item);
+if ((crcmode == 2) && !verify_item_crc(item)) printf(" - ошибка CRC\n");
 }
 
 //**********************************************
