@@ -580,14 +580,18 @@ if ((i == sizeof(prodinfo))&&(prodinfo.index != 0)) {
 
 // вывод IMEI
 load_item(0,buf);
-printf("\n IMEI  : ");
+printf("\n IMEI        : ");
 for (i=0;i<15;i++) printf("%c",buf[i]+'0');
 // вывод серийника
 load_item(6,buf);
-printf("\n Serial: %16.16s",buf);
+printf("\n Serial      : %16.16s",buf);
 // IP-адрес:
 load_item(44,buf);
-printf("\n IPaddr: %s",buf);
+printf("\n IPaddr      : %s",buf);
+
+// mac
+load_item(50014,buf);
+if (buf[0] != 0) printf("\n Ethernet MAC: %s",buf);
 
 // вывод wifi-параметров
 #ifndef WIN32
@@ -619,12 +623,11 @@ if (buf[0] != 0) {
   printf("\n\n *** Параметры Wifi ***\n\n #  SSID                             KEY\n\
 ----------------------------------------------------------------------------------\n");
   for(i=0;i<wicount;i++) printf("\n %1i  %-32.32s %-32.32s",i,(char*)&wissid[i],(char*)&wikey[i]);
-  printf("\n");
 
 }
 
 // Проверяем crc
-
+printf("\n");
 // Выделяем CRC заголовка
 if (crcmode == 2) {
   if ((nvhd.ctrl_size-nvhd.item_offset-nvhd.item_size) != 4) 
@@ -634,34 +637,34 @@ if (crcmode == 2) {
    fseek(nvf,nvhd.ctrl_size-4,SEEK_SET);
    fread(&crc_ctrl,4,1,nvf);
    if (crc_ctrl == calc_ctrl_crc())
-     printf("\n CTRL CRC   : OK");
+     printf("\n CTRL CRC    : OK");
    else
-     printf("\n CTRL CRC   : Error!");
+     printf("\n CTRL CRC    : Error!");
   } 
 }    
-else printf("\n CTRL CRC   : Отсутствует");
+else printf("\n CTRL CRC    : Отсутствует");
 
 // Проверяем CRC области данных
 switch (crcmode) {
   case 0:
-    printf("\n DATA CRC   : Отсутствует");
+    printf("\n DATA CRC    : Отсутствует");
     break;
     
   case 1:  
-    if (test_crc() == 0) printf("\n DATA CRC   : OK");
-    else printf("\n DATA CRC   : Error!");
+    if (test_crc() == 0) printf("\n DATA CRC    : OK");
+    else printf("\n DATA CRC    : Error!");
     break;
     
   case 2:
     for (i=0;i<nvhd.item_count;i++) {
      if ((crcmode ==2) && !verify_item_crc(itemlist[i].id))  badflag++;
     }   
-    if (badflag != 0) printf("\n DATA CRC   : Ячеек с ошибкой CRC: %i",badflag);
-    else printf("\n DATA CRC   : OK");
+    if (badflag != 0) printf("\n DATA CRC    : Ячеек с ошибкой CRC: %i",badflag);
+    else printf("\n DATA CRC    : OK");
     break;
     
   default:
-    printf("\n DATA CRC   : Неподдерживаемый тип");
+    printf("\n DATA CRC    : Неподдерживаемый тип");
   
 }
 
