@@ -43,6 +43,17 @@ int test_crc();
 void recalc_crc();
 
 //****************************************************************
+//* Проверка допустимости работы с CRC
+//****************************************************************
+void check_crcmode() {
+  
+if (crcmode == -1) {
+  printf("\n Неподдерживаемый тип CRC - nvram доступна только для чтения\n");
+  exit(0);
+}
+}
+
+//****************************************************************
 //*   Разбор параметров ключа -m
 //****************************************************************
 void parse_mflag(char* arg) {
@@ -448,10 +459,14 @@ if (dflag != -1) {
 }
 
 // Массовый импорт ячеек (ключ -w)
-if (strlen(wflag) != 0) mass_import(wflag);
+if (strlen(wflag) != 0) {
+check_crcmode();
+mass_import(wflag);
+}
 
 // Замена ячеек
 if (rflag != -1) {
+  check_crcmode();
   len=itemlen(rflag);
   if (len == -1) {
     printf("\n - Ячейка %i не найдена\n",rflag);
@@ -475,6 +490,7 @@ if (rflag != -1) {
 
 // прямое редактирование ячеек
 if (mflag != -1) {
+  check_crcmode();
   len=load_item(mflag,buf);
   if (len == -1) {
     printf("\n - Ячейка %i не найдена\n",mflag);
@@ -493,7 +509,8 @@ if (mflag != -1) {
 
 // Запись текстовых строк в ячейку
 if (aflag != -1) {
-  len=load_item(aflag,buf);
+ check_crcmode();
+ len=load_item(aflag,buf);
   if (len == -1) {
     printf("\n - Ячейка %i не найдена\n",mflag);
     return;
@@ -532,13 +549,19 @@ if (bflag) {
 }
 
 // запись IMEI
-if (iflag) write_imei(imei);
+if (iflag) {
+  check_crcmode();
+  write_imei(imei);
+}
 
 // запись серийника
-if (sflag) write_serial(serial);
+if (sflag) {
+  check_crcmode();
+  write_serial(serial);
+}
 
 // перевычисление массива КС
-recalc_crc();
+if (crcmode != -1) recalc_crc();
 fclose(nvf);
 
 #ifdef MODEM
