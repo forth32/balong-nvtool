@@ -21,6 +21,9 @@
 #include "nvcrc.h"
 #include "sha2.h"
 
+// Максимально допустимый размер ячеек
+#define max_item_len 10000
+
 // Хранилище заголовка файла
 struct nvfile_header nvhd;
 // Каталог файлов
@@ -275,7 +278,7 @@ printf("\n\n");
 void dump_item(uint32_t item) {
 
 int len;
-char buf[4100];
+char buf[max_item_len];
 char* desc;
 int32_t idx,fidx;    
 int32_t fn;
@@ -347,7 +350,7 @@ return 1; // ok
 void item_to_file(int item, char* prefix) {
   
 char filename[100];
-char buf[4100];
+char buf[max_item_len];
 FILE* out;
 int len;
 
@@ -392,7 +395,7 @@ int i;
 char filename[200];
 uint32_t fsize;
 FILE* in;
-char ibuf[4100];
+char ibuf[max_item_len];
 int idx;
 
 printf("\n Импорт ячеек:\n\n");
