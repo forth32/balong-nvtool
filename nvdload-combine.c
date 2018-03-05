@@ -7,6 +7,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef WIN32
+#include <windows.h>
+#include "printf.h"
+#endif
 
 void main(int argc, char* argv[]) {
 
@@ -38,13 +42,17 @@ if (argc != 3) {
 }
 
 // заполняем заголовок
+#ifndef WIN32
 bzero(&hdr,sizeof(hdr));
+#else
+memset(&hdr, 0, sizeof(hdr));
+#endif
 hdr.sig1 = 0x766e;
 hdr.sig2 = 0x766e;
 
 
 // читаем раздел NVIMG
-in=fopen(argv[1],"r");
+in=fopen(argv[1],"rb");
 if (in == 0) {
   printf("\n Ошибка открытия NVIMG-файла %s\n",argv[1]);
   exit(0);
@@ -58,7 +66,7 @@ fread(bufimg,1,hdr.len1,in);
 fclose(in);
 
 // читаем раздел XML
-in=fopen(argv[2],"r");
+in=fopen(argv[2],"rb");
 if (in == 0) {
   printf("\n Ошибка открытия XML-файла %s\n",argv[1]);
   exit(0);
@@ -76,7 +84,7 @@ hdr.start1=0x54;
 hdr.start2=hdr.start1+hdr.len1;
 
 // записываем компоненты
-out=fopen("nvdload.nvd","w");
+out=fopen("nvdload.nvd","wb");
 fwrite(&hdr,1,0x54,out);
 
 printf("\n Тип    старт    размер\n--------------------------");

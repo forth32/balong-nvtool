@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="getopt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="printf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -33,6 +30,9 @@
     <ClInclude Include="..\..\sha2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\shared\getopt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\balong-nvtool.c">
@@ -44,13 +44,13 @@
     <ClCompile Include="..\..\nvio.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="getopt.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\nvcrc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sha2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\shared\getopt.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{E1985ABA-BA5F-445D-9E72-02752D60E53B}</ProjectGuid>
+    <ProjectGuid>{FAF38434-9836-41A0-9D38-ADBE6C93EA21}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>balongnvtool</RootNamespace>
+    <RootNamespace>nvdloadcombine</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -26,7 +26,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v110_xp</PlatformToolset>
+    <PlatformToolset>v110</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Static</UseOfMfc>
@@ -54,16 +54,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\..\shared</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\shared</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
-    <PreBuildEvent>
-      <Command>echo #define BUILDNO \&gt; $(ProjectDir)buildno.h
-type $(ProjectDir)..\..\build &gt;&gt; $(ProjectDir)buildno.h</Command>
-    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -74,7 +70,7 @@ type $(ProjectDir)..\..\build &gt;&gt; $(ProjectDir)buildno.h</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\..\shared</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\shared</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -82,26 +78,9 @@ type $(ProjectDir)..\..\build &gt;&gt; $(ProjectDir)buildno.h</Command>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
-    <PreBuildEvent>
-      <Command>echo #define BUILDNO \&gt; $(ProjectDir)buildno.h
-type $(ProjectDir)..\..\build &gt;&gt; $(ProjectDir)buildno.h</Command>
-    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\nvfile.h" />
-    <ClInclude Include="..\..\nvid.h" />
-    <ClInclude Include="..\..\nvio.h" />
-    <ClInclude Include="..\..\sha2.h" />
-    <ClInclude Include="..\shared\getopt.h" />
-    <ClInclude Include="printf.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\balong-nvtool.c" />
-    <ClCompile Include="..\..\nvcrc.c" />
-    <ClCompile Include="..\..\nvid.c" />
-    <ClCompile Include="..\..\nvio.c" />
-    <ClCompile Include="..\..\sha2.c" />
-    <ClCompile Include="..\shared\getopt.c" />
+    <ClCompile Include="..\..\nvdload-combine.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

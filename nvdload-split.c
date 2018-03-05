@@ -5,6 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef WIN32
+#include <windows.h>
+#include "printf.h"
+#endif
 
 void main(int argc, char* argv[]) {
 
@@ -28,7 +32,7 @@ if (argc != 2) {
   exit(0);
 }
 
-in=fopen(argv[1],"r");
+in=fopen(argv[1],"rb");
 if (in == 0) {
   printf("\n Ошибка открытия файла %s\n",argv[1]);
   exit(0);
@@ -42,14 +46,14 @@ if ((hdr.sig1 != 0x766e) || (hdr.sig2 != 0x766e)) {
 }  
 
 printf("\nNVIMG  %08x  %08x",hdr.start1,hdr.len1);
-out=fopen("nvimg.nvm","w");
+out=fopen("nvimg.nvm","wb");
 fseek(in,hdr.start1,SEEK_SET);
 fread(buf,1,hdr.len1,in);
 fwrite(buf,1,hdr.len1,out);
 fclose(out);
 
 printf("\nXML    %08x  %08x",hdr.start2,hdr.len2);
-out=fopen("nvimg.xml","w");
+out=fopen("nvimg.xml","wb");
 fseek(in,hdr.start2,SEEK_SET);
 fread(buf,1,hdr.len2,in);
 fwrite(buf,1,hdr.len2,out);
