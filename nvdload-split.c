@@ -15,7 +15,11 @@ void main(int argc, char* argv[]) {
 FILE* in;  
 FILE* out;
 
+#ifndef WIN32
 char buf[1024*1024*5]; // буфер 5М под компоненты
+#else
+static char buf[1024*1024*5]; // буфер 5М под компоненты
+#endif
 
 struct {
   uint32_t sig1;
