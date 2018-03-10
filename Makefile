@@ -8,8 +8,8 @@ TARGET = balong-nvtool nvdload-split nvdload-combine
 all:    $(TARGET)
 
 clean: 
-	rm *.o
-	rm $(TARGET)
+	rm -f *.o
+	rm -f $(TARGET)
 
 balong-nvtool: balong-nvtool.o nvio.o nvid.o sha2.o nvcrc.o
 	@gcc $^ -o $@ $(LIBS) 
