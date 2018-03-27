@@ -214,7 +214,7 @@ int i;
 int opt;
 int res;
 uint32_t pos;
-char buf[2062];
+char buf[10000];
 int len;
 char rfilename[200];
 char* sptr;
