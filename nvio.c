@@ -404,7 +404,7 @@ for (i=0;i<65536;i++) {
   in=fopen(filename,"rb");
   if (in == 0) continue; // такого файла у нас нет
   // грузим файл в буфер и заодно определяем размер его
-  fsize=fread(ibuf,1,2054,in);
+  fsize=fread(ibuf,1,10000,in);
   fclose(in);
   // проверяем параметры ячейки в образе
   idx=itemidx(i);
