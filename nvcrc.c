@@ -88,7 +88,7 @@ filesize=ftell(nvf);
 // printf("\n fsize=%i crcoff=%i",filesize,crcoff);
 if (filesize == crcoff) return 0;
 // размер массива КС
-return filesize-crcoff-4;
+return filesize-crcoff-(crcmode == 1 ? 4 : 8);
 } 
   
 //***************************************************
@@ -151,7 +151,7 @@ uint32_t blocksize=4096;
 uint32_t i;
 
 // проверяем флаг наличия CRC
-if (crcmode != 1) return; // только для блочной CRC
+if (crcmode != 1 && crcmode != 3) return; // только для блочной CRC
 
 crcsize=calc_crcsize();
 

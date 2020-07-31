@@ -296,13 +296,14 @@ while ((opt = getopt(argc, argv, "hlucex:d:r:m:b:i:s:a:k:w:f")) != -1) {
      
    case 'i':
      iflag=1;
+     memset(imei,0,16);
      strncpy(imei,optarg,15);
      break;
      
    case 's':
      sflag=1;
-     memset(serial,0xff,16);
-     strncpy(serial,optarg,20);
+     memset(serial,0xFF,20);
+     strncpy(serial,optarg,strlen(optarg) < 16 ? strlen(optarg) : 16);
      break;
      
    case 'x':
@@ -391,18 +392,22 @@ switch (nvhd.crcflag) {
     crcmode=0;
     break;
     
-  case 1:  
+  case 1:
     crcmode=1;
     break;
-    
+
+  case 3:
+    crcmode=3;
+    break;
+
   case 8:
     crcmode=2;
     break;
-    
+
   default:
     crcmode=-1;
     break;
-    
+
 }
 
 //----- Читаем каталог файлов

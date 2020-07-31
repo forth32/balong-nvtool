@@ -152,6 +152,10 @@ switch (crcmode) {
     printf("Блочная, тип 1");
     break;
     
+  case 3:
+    printf("Блочная, тип 3");
+    break;
+    
   case 2:
     printf("Индивидуальная, тип 8");
     break;
@@ -479,7 +483,6 @@ printf("\n%s-код не найден\n",(flag == 1)?"OEM":"Simlock");
 //* Запись нового IMEI
 //************************************************
 void write_imei(char* imei) {
-
 unsigned char binimei[16];
 int i,f,j;  
 char cbuf[7];
@@ -529,11 +532,11 @@ else printf("\n Ошибка поиска ячейки 0");
 //************************************************
 void  write_serial(char* serial) {
 
-char* sptr;
+//char* sptr;
 
 // заменяем нули на 0xff
-sptr=strchr(serial,0);
-if (sptr != 0) *sptr=0xff;
+//sptr=strchr(serial,0);
+//if (sptr != 0) *sptr=0xff;
 
 if (save_item(6,serial)) printf("\n Серийный номер успешно записан\n");
 else printf("\n Ошибка поиска ячейки 6");
@@ -653,7 +656,8 @@ switch (crcmode) {
     printf("\n DATA CRC    : Отсутствует");
     break;
     
-  case 1:  
+  case 1:
+  case 3:
     if (test_crc() == 0) printf("\n DATA CRC    : OK");
     else printf("\n DATA CRC    : Error!");
     break;
